@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Fehlerkorrektur (8 Beispiele)</title>
+    <!-- Polyfill für Touch-Interaktionen (Standard-Inklusion) -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c; /* Rot für Fehler/Korrektur-Look */
+            --correct-color: #27ae60;
+            --solution-color: #f39c12;
+            --bg-color: #f3f4f6;
+            --paper-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* --- Der Text-Editor (Papier-Look) --- */
+        .paper-sheet {
+            background-color: var(--paper-bg);
+            padding: 40px;
+            border-radius: 2px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 40px rgba(0,0,0,0.05) inset;
+            position: relative;
+            margin-bottom: 30px;
+            font-size: 1.15em; /* Größere Schrift für bessere Lesbarkeit */
+        }
+        
+        /* Rote Randlinie für Papier-Effekt */
+        .paper-sheet::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 30px; bottom: 0;
+            width: 2px;
+            background-color: #ffcccc;
+            opacity: 0.6;
+        }
+
+        .editor-content {
+            margin-left: 20px; /* Platz neben der roten Linie */
+        }
+
+        h2.doc-title {
+            text-align: center;
+            font-family: 'Georgia', serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* --- Die interaktiven Dropdowns im Text --- */
+        select.inline-select {
+            display: inline-block;
+            appearance: none;
+            -webkit-appearance: none;
+            background-color: #f9f9f9;
+            border: none;
+            border-bottom: 2px dashed var(--primary-color);
+            font-family: inherit;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #2980b9;
+            padding: 2px 10px 2px 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0 2px;
+            border-radius: 4px;
+        }
+
+        select.inline-select:hover {
+            background-color: #eef;
+            border-bottom-style: solid;
+        }
+
+        select.inline-select:focus {
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        /* --- Feedback Styles --- */
+        
+        /* Richtig vom User gewählt */
+        select.inline-select.is-correct {
+            border-bottom: 2px solid var(--correct-color);
+            background-color: #eafaf1;
+            color: var(--correct-color);
+        }
+
+        /* Falsch vom User gewählt */
+        select.inline-select.is-wrong {
+            border-bottom: 2px solid var(--accent-color);
+            background-color: #fadbd8;
+            color: var(--accent-color);
+        }
+
+        /* Lösung angezeigt (Automatisch korrigiert) */
+        select.inline-select.is-solution {
+            border-bottom: 2px solid var(--solution-color);
+            background-color: #fef9e7;
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-bottom: 20px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #34495e; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .paper-sheet { padding: 20px; padding-left: 15px; }
+            .paper-sheet::before { display: none; /* Linie auf Handy ausblenden für mehr Platz */ }
+            .editor-content { margin-left: 0; }
+            
+            .btn-group { flex-direction: column; }
+            button { width: 100%; max-width: none; }
+            
+            select.inline-select {
+                width: 100%;
+                margin: 5px 0;
+                border: 1px solid #ccc; /* Auf Handy besser sichtbar als Border-Bottom */
+                background-color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Finde die Fehler!</h1>
+    <div class="instruction">
+        Lies den Text. Einige Verben sind falsch verwendet. <br>
+        Wähle im Dropdown-Menü die <strong>korrekte Form</strong> aus.<br>
+        <em>(Achtung: Manche Verben im Text sind vielleicht schon richtig!)</em>
+    </div>
+
+    <div class="paper-sheet">
+        <h2 class="doc-title">Ein stressiger Tag</h2>
+        <div class="editor-content">
+            <p>
+                Вчера у меня был трудный день. Сначала я 
+                <!-- 1. Fehler im Text (спросил), Lösung: попросил -->
+                <select id="s1" class="inline-select" data-answer="попросил" data-original="спросил">
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                друга помочь мне с машиной. Потом я поехал в университет.
+            </p>
+            <p>
+                Там я встретил профессора. Я 
+                <!-- 2. Richtig im Text (спросил), Lösung: спросил -->
+                <select id="s2" class="inline-select" data-answer="спросил" data-original="спросил">
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                его, когда будет экзамен. Он ответил быстро.
+            </p>
+            <p>
+                Потом я видел соседей. Они часто 
+                <!-- 3. Fehler im Text (просят), Lösung: спрашивают -->
+                <select id="s3" class="inline-select" data-answer="спрашивают" data-original="просят">
+                    <option value="просят">просят</option>
+                    <option value="спрашивают">спрашивают</option>
+                </select>
+                меня о работе.
+            </p>
+            <p>
+                Вечером мама позвонила. Она 
+                <!-- 4. Fehler im Text (спросила), Lösung: попросила -->
+                <select id="s4" class="inline-select" data-answer="попросила" data-original="спросила">
+                    <option value="спросила">спросила</option>
+                    <option value="попросила">попросила</option>
+                </select>
+                меня купить хлеб. 
+            </p>
+            <p>
+                В магазине я не нашел молоко. Я 
+                <!-- 5. Fehler im Text (попросил), Lösung: спросил -->
+                <select id="s5" class="inline-select" data-answer="спросил" data-original="попросил">
+                    <option value="попросил">попросил</option>
+                    <option value="спросил">спросил</option>
+                </select>
+                продавца, где молоко.
+            </p>
+            <p>
+                Дома брат громко слушал музыку. Я 
+                <!-- 6. Fehler im Text (спросил), Lösung: попросил -->
+                <select id="s6" class="inline-select" data-answer="попросил" data-original="спросил">
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                его не шуметь.
+            </p>
+            <p>
+                Потом мы пошли в кафе. Я 
+                <!-- 7. Richtig im Text (попросил), Lösung: попросил -->
+                <select id="s7" class="inline-select" data-answer="попросил" data-original="попросил">
+                    <option value="попросил">попросил</option>
+                    <option value="спросил">спросил</option>
+                </select>
+                официанта принести меню.
+            </p>
+            <p>
+                В конце дня папа 
+                <!-- 8. Fehler im Text (попросил), Lösung: спросил -->
+                <select id="s8" class="inline-select" data-answer="спросил" data-original="попросил">
+                    <option value="попросил">попросил</option>
+                    <option value="спросил">спросил</option>
+                </select>
+                меня, почему я так поздно пришел.
+            </p>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const selects = document.querySelectorAll('.inline-select');
+        
+        selects.forEach(select => {
+            const userAnswer = select.value;
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            // Klassen resetten
+            select.classList.remove('is-correct', 'is-wrong', 'is-solution');
+
+            if (userAnswer === correctAnswer) {
+                select.classList.add('is-correct');
+            } else {
+                select.classList.add('is-wrong');
+            }
+        });
+    }
+
+    function resetGame() {
+        const selects = document.querySelectorAll('.inline-select');
+        
+        selects.forEach(select => {
+            // Zurück zum Urzustand (Text mit Fehlern, wie im Attribut 'data-original' definiert)
+            const originalValue = select.getAttribute('data-original');
+            select.value = originalValue;
+            
+            // Klassen entfernen
+            select.classList.remove('is-correct', 'is-wrong', 'is-solution');
+        });
+    }
+
+    function showSolution() {
+        const selects = document.querySelectorAll('.inline-select');
+        
+        selects.forEach(select => {
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            // Setzt das Dropdown auf die richtige Antwort
+            select.value = correctAnswer;
+            
+            // Styling für Lösung anwenden
+            select.classList.remove('is-correct', 'is-wrong');
+            select.classList.add('is-solution');
+        });
+    }
+</script>
+
+</body>
+</html>
