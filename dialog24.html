@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Dialog-Ergänzung</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #eceff1;
+            --chat-bg-a: #ffffff;
+            --chat-bg-b: #d1ecf1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- Chat Layout --- */
+        .chat-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .dialogue-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 12px;
+            background-color: rgba(255,255,255,0.5); /* Leichter Container für Gruppierung */
+            border: 2px solid transparent; /* Für Feedback-Rahmen */
+            transition: all 0.3s;
+        }
+
+        /* Sprechblasen */
+        .bubble {
+            position: relative;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 85%;
+            font-size: 1.05em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .bubble-a {
+            align-self: flex-start;
+            background-color: var(--chat-bg-a);
+            border-bottom-left-radius: 2px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .bubble-b {
+            align-self: flex-end;
+            background-color: var(--chat-bg-b);
+            border-bottom-right-radius: 2px;
+            color: #0c5460;
+        }
+
+        .speaker-label {
+            font-size: 0.75em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        /* --- Dropdown im Text --- */
+        select {
+            padding: 5px 10px;
+            font-size: 1em;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            outline: none;
+            margin: 0 5px;
+        }
+
+        select:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* --- Feedback --- */
+        .dialogue-box.is-correct {
+            background-color: #eafaf1;
+            border-color: var(--success-color);
+        }
+        .dialogue-box.is-correct select {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .dialogue-box.is-wrong {
+            background-color: #fadbd8;
+            border-color: var(--error-color);
+        }
+        .dialogue-box.is-wrong select {
+            border-color: var(--error-color);
+        }
+
+        .dialogue-box.is-solution {
+            background-color: #fff3cd;
+            border-color: var(--solution-color);
+        }
+        .dialogue-box.is-solution select {
+            border-color: var(--solution-color);
+            background-color: #fff;
+        }
+
+        /* Erklärung / Clue */
+        .clue-box {
+            display: none;
+            margin-top: 5px;
+            padding: 8px;
+            background-color: rgba(255,255,255,0.7);
+            border-radius: 6px;
+            font-size: 0.9em;
+            color: #555;
+            text-align: center;
+        }
+        .clue-box strong { color: var(--primary-color); }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: sticky;
+            bottom: 20px;
+            padding: 10px;
+            background: rgba(236, 239, 241, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-solution { background-color: var(--solution-color); color: white; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .bubble { max-width: 95%; }
+            .btn-group { flex-direction: column; bottom: 0; width: 100%; border-radius: 0; padding: 15px; margin: 0; left: 0; box-sizing: border-box;}
+            button { max-width: none; width: 100%; }
+            .container { padding-bottom: 150px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Dialog-Ergänzung</h1>
+    <div class="instruction">
+        Lies den Dialog. Achte auf die <strong>Antwort von Person B</strong>.<br>
+        Verrät die Antwort, dass nach einer <em>Info</em> gefragt wurde, oder dass eine <em>Handlung</em> ausgeführt wurde?
+    </div>
+
+    <div class="chat-wrapper">
+
+        <!-- Dialog 1 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Я 
+                <select data-answer="попросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                его закрыть окно.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                И что, он <strong>закрыл</strong>?
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt nach dem Ergebnis der Handlung ("geschlossen?"). &rarr; <strong>Bitte</strong>
+            </div>
+        </div>
+
+        <!-- Dialog 2 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Я 
+                <select data-answer="спросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                преподавателя, где аудитория.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                И что он <strong>ответил</strong>?
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt nach der Antwort/Information ("geantwortet?"). &rarr; <strong>Frage</strong>
+            </div>
+        </div>
+
+        <!-- Dialog 3 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Анна 
+                <select data-answer="попросила">
+                    <option value="">...</option>
+                    <option value="спросила">спросила</option>
+                    <option value="попросила">попросила</option>
+                </select>
+                брата помочь ей.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                Он <strong>помог</strong>? У него было время?
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt, ob die Aktion stattgefunden hat ("geholfen?"). &rarr; <strong>Bitte</strong>
+            </div>
+        </div>
+
+        <!-- Dialog 4 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Турист 
+                <select data-answer="спросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                меня, как пройти в центр.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                Ты ему <strong>объяснил</strong> дорогу?
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt, ob die Info weitergegeben wurde ("erklärt?"). &rarr; <strong>Frage</strong>
+            </div>
+        </div>
+
+        <!-- Dialog 5 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Начальник 
+                <select data-answer="попросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                прислать отчёт сегодня.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                Ты уже <strong>отправил</strong> его?
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt nach der Ausführung ("abgeschickt?"). &rarr; <strong>Bitte</strong>
+            </div>
+        </div>
+
+        <!-- Dialog 6 -->
+        <div class="dialogue-box">
+            <div class="bubble bubble-a">
+                <span class="speaker-label">Person A</span>
+                Мы 
+                <select data-answer="спросили">
+                    <option value="">...</option>
+                    <option value="спросили">спросили</option>
+                    <option value="попросили">попросили</option>
+                </select>
+                о цене билета.
+            </div>
+            <div class="bubble bubble-b">
+                <span class="speaker-label">Person B</span>
+                Она высокая? (<strong>Сколько</strong>?)
+            </div>
+            <div class="clue-box">
+                Hinweis: B fragt nach dem Inhalt der Information. &rarr; <strong>Frage</strong>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const boxes = document.querySelectorAll('.dialogue-box');
+        
+        boxes.forEach(box => {
+            const select = box.querySelector('select');
+            const clue = box.querySelector('.clue-box');
+            const userAnswer = select.value;
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            // Reset styles first
+            box.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            
+            if (userAnswer === "") return;
+
+            if (userAnswer === correctAnswer) {
+                box.classList.add('is-correct');
+            } else {
+                box.classList.add('is-wrong');
+            }
+            
+            // Hinweis immer anzeigen nach dem Check, um den Lerneffekt zu verstärken
+            clue.style.display = 'block';
+        });
+    }
+
+    function resetGame() {
+        const boxes = document.querySelectorAll('.dialogue-box');
+        
+        boxes.forEach(box => {
+            const select = box.querySelector('select');
+            const clue = box.querySelector('.clue-box');
+            
+            select.value = "";
+            box.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            clue.style.display = 'none';
+        });
+    }
+
+    function showSolution() {
+        const boxes = document.querySelectorAll('.dialogue-box');
+        
+        boxes.forEach(box => {
+            const select = box.querySelector('select');
+            const clue = box.querySelector('.clue-box');
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            select.value = correctAnswer;
+            box.classList.remove('is-correct', 'is-wrong');
+            box.classList.add('is-solution');
+            clue.style.display = 'block';
+        });
+    }
+</script>
+
+</body>
+</html>
