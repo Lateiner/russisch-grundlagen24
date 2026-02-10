@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Grammatik: спрашивать vs. просить</title>
+    <!-- Polyfill für Touch Drag & Drop -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Einführungskarte */
+        .intro-card {
+            background-color: var(--card-bg);
+            border-left: 5px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .rule-box {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .ru {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-style: normal; 
+        }
+
+        /* Übungskarten */
+        .exercise-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .exercise-header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Interaktive Elemente */
+        select {
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .radio-group, .checkbox-group {
+            margin: 10px 0;
+        }
+
+        .radio-group label, .checkbox-group label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .radio-group label:hover, .checkbox-group label:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Drag and Drop Styles */
+        .drop-zone-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            min-width: 200px;
+            min-height: 150px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fafafa;
+        }
+
+        .drop-zone h4 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        .draggable-items {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 8px;
+            min-height: 50px;
+        }
+
+        .draggable {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: move;
+            user-select: none;
+            border: 2px solid transparent;
+        }
+
+        /* Button Styles */
+        .btn-group {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-check { background-color: var(--accent-color); color: white; }
+        .btn-check:hover { background-color: #2980b9; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* Feedback Styles - Inline Visuals */
+        .is-correct {
+            border-color: var(--success-color) !important;
+            background-color: #eafaf1 !important;
+            color: var(--success-color);
+        }
+        
+        /* Für Radio/Checkbox Label Hintergrund */
+        label.is-correct-bg {
+            background-color: #eafaf1;
+            border-color: var(--success-color);
+        }
+
+        .is-incorrect {
+            border-color: var(--error-color) !important;
+            background-color: #fadbd8 !important;
+        }
+        
+        label.is-incorrect-bg {
+            background-color: #fadbd8;
+            border-color: var(--error-color);
+        }
+
+        .is-solution {
+            border-color: var(--solution-color) !important;
+            background-color: #fef9e7 !important;
+            box-shadow: 0 0 5px var(--solution-color);
+        }
+        
+        label.is-solution-bg {
+            background-color: #fef9e7;
+            border-color: var(--solution-color);
+            position: relative;
+        }
+
+        /* Feedback Icons */
+        .icon {
+            margin-left: 8px;
+            font-weight: bold;
+            display: none;
+        }
+        .icon.show { display: inline; }
+        .icon-check { color: var(--success-color); }
+        .icon-cross { color: var(--error-color); }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Russische Grammatik: fragen & bitten</h1>
+
+    <!-- Einführung -->
+    <div class="intro-card">
+        <h2>Der Unterschied zwischen спрашивать/спросить und просить/попросить</h2>
+        
+        <div class="rule-box">
+            <h3>1. спрашивать / спросить (Fragen stellen)</h3>
+            <p>Bedeutung: Man möchte eine <strong>Information</strong>.</p>
+            <p>Konstruktion: <span class="ru">спрашивать</span> + Akkusativ + <span class="ru">о</span> / oder Nebensatz (wo, wann...).</p>
+        </div>
+
+        <div class="rule-box">
+            <h3>2. просить / попросить (Bitten / Auffordern)</h3>
+            <p>Bedeutung: Man möchte eine <strong>Handlung</strong>.</p>
+            <p>Konstruktion: <span class="ru">просить</span> + Akkusativ + <strong>Infinitiv</strong> (etwas zu tun).</p>
+        </div>
+    </div>
+
+    <!-- Übung 1: Multiple Choice -->
+    <div class="exercise-card" id="ex1">
+        <div class="exercise-header">1. Auswahl: Information oder Aktion?</div>
+        <p>Wähle aus, welches Verb passt.</p>
+        
+        <div class="question">
+            <p>1. Я хочу знать время. Я ... его, который час.</p>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="ex1q1" value="correct"> <span class="ru">спрашиваю</span>
+                    <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+                </label>
+                <label>
+                    <input type="radio" name="ex1q1" value="wrong"> <span class="ru">прошу</span>
+                    <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="question">
+            <p>2. Мне нужна помощь. Я ... друга помочь мне.</p>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="ex1q2" value="wrong"> <span class="ru">спрашиваю</span>
+                    <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+                </label>
+                <label>
+                    <input type="radio" name="ex1q2" value="correct"> <span class="ru">прошу</span>
+                    <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkRadio('ex1')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetRadio('ex1')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveRadio('ex1')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 2: Dropdown Präsens -->
+    <div class="exercise-card" id="ex2">
+        <div class="exercise-header">2. Konjugation im Präsens</div>
+        <p>Wähle die richtige Form im Dropdown-Menü.</p>
+        
+        <p>1. Студент 
+            <select data-answer="спрашивает">
+                <option value="">...</option>
+                <option value="спрашивает">спрашивает (fragt)</option>
+                <option value="просит">просит (bittet)</option>
+            </select> 
+            преподавателя о тесте.</p>
+        
+        <p>2. Мама часто 
+            <select data-answer="просит">
+                <option value="">...</option>
+                <option value="спрашивает">спрашивает (fragt)</option>
+                <option value="просит">просит (bittet)</option>
+            </select> 
+            сына купить хлеб.</p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex2')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex2')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex2')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 3: Drag & Drop -->
+    <div class="exercise-card" id="ex3">
+        <div class="exercise-header">3. Kategorisierung</div>
+        <p>Ziehe die Satzenden in das richtige Feld.</p>
+        
+        <div class="drop-zone-container">
+            <div class="drop-zone" id="zone-ask" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h4><span class="ru">спросил</span> (fragte)</h4>
+            </div>
+            <div class="drop-zone" id="zone-req" ondrop="drop(event)" ondragover="allowDrop(event)">
+                <h4><span class="ru">попросил</span> (bat)</h4>
+            </div>
+        </div>
+
+        <div class="draggable-items" id="drag-source-ex3" ondrop="drop(event)" ondragover="allowDrop(event)">
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="d1" data-target="zone-ask"><span class="ru">где метро</span></div>
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="d2" data-target="zone-req"><span class="ru">дать ручку</span></div>
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="d3" data-target="zone-req"><span class="ru">закрыть дверь</span></div>
+            <div class="draggable" draggable="true" ondragstart="drag(event)" id="d4" data-target="zone-ask"><span class="ru">почему он здесь</span></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkDrag('ex3')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetDrag('ex3', 'drag-source-ex3')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveDrag('ex3')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 4: Auswahlmenü (Aspekt) -->
+    <div class="exercise-card" id="ex4">
+        <div class="exercise-header">4. Vergangenheit und Aspekt</div>
+        <p>Wähle das richtige Verb.</p>
+        
+        <p>Вчера на улице турист 
+            <select data-answer="спросил">
+                <option value="">...</option>
+                <option value="спросил">спросил (fragte)</option>
+                <option value="попросил">попросил (bat)</option>
+            </select> 
+            меня, как пройти в музей.
+        </p>
+        <p>Я 
+            <select data-answer="попросил">
+                <option value="">...</option>
+                <option value="спросил">спросил (fragte)</option>
+                <option value="попросил">попросил (bat)</option>
+            </select> 
+            его говорить медленнее.
+        </p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex4')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex4')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex4')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 5: Wortschatz (Infinitiv) -->
+    <div class="exercise-card" id="ex5">
+        <div class="exercise-header">5. Signalwörter erkennen</div>
+        <p>Wähle den richtigen Infinitiv für: "Der Lehrer bat die Studenten zu <strong>schreiben</strong>."</p>
+        
+        <p><span class="ru">Преподаватель попросил студентов...</span> 
+            <select data-answer="писать">
+                <option value="">...</option>
+                <option value="читать">читать (lesen)</option>
+                <option value="писать">писать (schreiben)</option>
+                <option value="говорить">говорить (sprechen)</option>
+            </select>
+        </p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex5')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex5')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex5')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 6: Wahr oder Falsch -->
+    <div class="exercise-card" id="ex6">
+        <div class="exercise-header">6. Fehler finden</div>
+        <p>Ist der folgende Satz grammatikalisch korrekt?</p>
+        <p class="ru" style="font-size: 1.2em; background: #eee; padding: 10px;">Он просил меня, где я был.</p>
+        
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="ex6q1" value="wrong"> Richtig
+                <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+            </label>
+            <label>
+                <input type="radio" name="ex6q1" value="correct"> Falsch
+                <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkRadio('ex6')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetRadio('ex6')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveRadio('ex6')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 7: Präpositionen -->
+    <div class="exercise-card" id="ex7">
+        <div class="exercise-header">7. Mit oder ohne Präposition?</div>
+        <p>Wähle die Präposition <span class="ru">о</span> oder "keine" (-).</p>
+        
+        <p>1. Мы спросили 
+            <select data-answer="о">
+                <option value="">...</option>
+                <option value="о">о</option>
+                <option value="на">на</option>
+                <option value="-">- (keine)</option>
+            </select> 
+        погоде.</p>
+        
+        <p>2. Он попросил 
+            <select data-answer="-">
+                <option value="">...</option>
+                <option value="о">о</option>
+                <option value="на">на</option>
+                <option value="-">- (keine)</option>
+            </select> 
+        принести воды.</p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex7')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex7')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex7')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 8: Übersetzung -->
+    <div class="exercise-card" id="ex8">
+        <div class="exercise-header">8. Übersetzen</div>
+        <p>Wähle das russische Verb (Vergangenheit Maskulin).</p>
+        <p>Er <strong>hat gefragt</strong>: 
+            <select data-answer="спросил">
+                <option value="">...</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+        </p>
+        <p>Er <strong>hat gebeten</strong>: 
+            <select data-answer="попросил">
+                <option value="">...</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+        </p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex8')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex8')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex8')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 9: Kontext wählen -->
+    <div class="exercise-card" id="ex9">
+        <div class="exercise-header">9. Welcher Kontext?</div>
+        <p>Situation: <span class="ru">«Анна спросила директора о зарплате.»</span></p>
+        <p>Was bedeutet das?</p>
+
+        <div class="radio-group">
+            <label>
+                <input type="radio" name="ex9q1" value="correct"> Sie wollte wissen, wie hoch das Gehalt ist (Information).
+                <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+            </label>
+            <label>
+                <input type="radio" name="ex9q1" value="wrong"> Sie wollte, dass er ihr das Gehalt jetzt auszahlt (Aktion).
+                <span class="icon icon-check">✔</span><span class="icon icon-cross">✘</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkRadio('ex9')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetRadio('ex9')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveRadio('ex9')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 10: Dropdown im Text -->
+    <div class="exercise-card" id="ex10">
+        <div class="exercise-header">10. Dialog</div>
+        <p>Vervollständige den Dialog.</p>
+        <p>
+            - Можно тебя 
+            <select data-answer="попросить">
+                <option value="">...</option>
+                <option value="спросить">спросить (fragen)</option>
+                <option value="попросить">попросить (bitten)</option>
+            </select> 
+            открыть окно? (eine Bitte)<br>
+            - Конечно. А я хотел тебя 
+            <select data-answer="спросить">
+                <option value="">...</option>
+                <option value="спросить">спросить (fragen)</option>
+                <option value="попросить">попросить (bitten)</option>
+            </select> 
+            , почему здесь так жарко. (eine Info)
+        </p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex10')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex10')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex10')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 11: Zuordnen (Checkboxen) -->
+    <div class="exercise-card" id="ex11">
+        <div class="exercise-header">11. Grammatik-Check</div>
+        <p>Welche Ergänzungen passen grammatikalisch zu <span class="ru">«Я прошу...»</span>?</p>
+        <p>Wähle alle passenden aus (Mehrfachauswahl möglich).</p>
+        
+        <div class="checkbox-group" id="ex11-checks">
+            <label>
+                <input type="checkbox" value="correct"> <span class="ru">тебя помочь</span> (dich zu helfen)
+                <span class="icon icon-check">✔</span>
+            </label>
+            <label>
+                <input type="checkbox" value="wrong"> <span class="ru">тебя, где ты</span> (dich, wo du bist)
+                <span class="icon icon-cross">✘</span>
+            </label>
+            <label>
+                <input type="checkbox" value="correct"> <span class="ru">дать мне книгу</span> (mir das Buch zu geben)
+                <span class="icon icon-check">✔</span>
+            </label>
+            <label>
+                <input type="checkbox" value="wrong"> <span class="ru">сколько это стоит</span> (wie viel das kostet)
+                <span class="icon icon-cross">✘</span>
+            </label>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkCheckbox('ex11')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetCheckbox('ex11')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveCheckbox('ex11')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Übung 12: Komplexe Sätze -->
+    <div class="exercise-card" id="ex12">
+        <div class="exercise-header">12. Abschlusstest</div>
+        <p>Setze ein: <span class="ru">спросил / попросил</span>.</p>
+        
+        <p>1. Виктор 
+            <select data-answer="попросил">
+                <option value="">...</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            меня позвонить врачу.</p>
+        <p>2. Я 
+            <select data-answer="спросил">
+                <option value="">...</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            Виктора, как его здоровье.</p>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="checkSelect('ex12')">Überprüfen</button>
+            <button class="btn-reset" onclick="resetSelect('ex12')">Zurücksetzen</button>
+            <button class="btn-solution" onclick="solveSelect('ex12')">Lösung anzeigen</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* --- Hilfsfunktionen --- */
+
+    function clearStyles(element) {
+        element.classList.remove('is-correct', 'is-incorrect', 'is-solution');
+        element.parentElement.classList.remove('is-correct-bg', 'is-incorrect-bg', 'is-solution-bg');
+    }
+
+    /* --- Radio Button Logic --- */
+    function checkRadio(id) {
+        const container = document.getElementById(id);
+        const inputs = container.querySelectorAll('input[type="radio"]');
+        
+        // Reset old feedback within this group
+        inputs.forEach(input => {
+            const label = input.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg', 'is-solution-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+            
+            if (input.checked) {
+                if (input.value === 'correct') {
+                    label.classList.add('is-correct-bg');
+                    label.querySelector('.icon-check').classList.add('show');
+                } else {
+                    label.classList.add('is-incorrect-bg');
+                    label.querySelector('.icon-cross').classList.add('show');
+                }
+            }
+        });
+    }
+
+    function resetRadio(id) {
+        const container = document.getElementById(id);
+        const inputs = container.querySelectorAll('input[type="radio"]');
+        inputs.forEach(input => {
+            input.checked = false;
+            const label = input.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg', 'is-solution-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+        });
+    }
+
+    function solveRadio(id) {
+        const container = document.getElementById(id);
+        const inputs = container.querySelectorAll('input[type="radio"]');
+        
+        // Erst resetten, dann Lösung markieren
+        inputs.forEach(input => {
+            input.checked = false; // Auswahl aufheben
+            const label = input.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+
+            if (input.value === 'correct') {
+                input.checked = true;
+                label.classList.add('is-solution-bg');
+            }
+        });
+    }
+
+    /* --- Select / Dropdown Logic --- */
+    function checkSelect(id) {
+        const container = document.getElementById(id);
+        const selects = container.querySelectorAll('select');
+        
+        selects.forEach(select => {
+            clearStyles(select);
+            const userAnswer = select.value;
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            if (userAnswer === "") return; // Nichts ausgewählt
+
+            if (userAnswer === correctAnswer) {
+                select.classList.add('is-correct');
+            } else {
+                select.classList.add('is-incorrect');
+            }
+        });
+    }
+
+    function resetSelect(id) {
+        const container = document.getElementById(id);
+        const selects = container.querySelectorAll('select');
+        selects.forEach(select => {
+            select.value = "";
+            clearStyles(select);
+        });
+    }
+
+    function solveSelect(id) {
+        const container = document.getElementById(id);
+        const selects = container.querySelectorAll('select');
+        selects.forEach(select => {
+            clearStyles(select);
+            select.value = select.getAttribute('data-answer');
+            select.classList.add('is-solution');
+        });
+    }
+
+    /* --- Checkbox Logic --- */
+    function checkCheckbox(id) {
+        const container = document.getElementById(id);
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        
+        checkboxes.forEach(cb => {
+            const label = cb.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg', 'is-solution-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+
+            if (cb.checked) {
+                if(cb.value === 'correct') {
+                    label.classList.add('is-correct-bg');
+                    label.querySelector('.icon-check').classList.add('show');
+                } else {
+                    label.classList.add('is-incorrect-bg');
+                    label.querySelector('.icon-cross').classList.add('show');
+                }
+            }
+        });
+    }
+
+    function resetCheckbox(id) {
+        const container = document.getElementById(id);
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+            const label = cb.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg', 'is-solution-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+        });
+    }
+
+    function solveCheckbox(id) {
+        const container = document.getElementById(id);
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            const label = cb.parentElement;
+            label.classList.remove('is-correct-bg', 'is-incorrect-bg');
+            label.querySelectorAll('.icon').forEach(i => i.classList.remove('show'));
+            
+            if(cb.value === 'correct') {
+                cb.checked = true;
+                label.classList.add('is-solution-bg');
+            } else {
+                cb.checked = false;
+            }
+        });
+    }
+
+    /* --- Drag and Drop Logic --- */
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var draggedElement = document.getElementById(data);
+        if(!draggedElement) return;
+
+        let target = ev.target;
+        // Hochwandern bis zur Dropzone oder Container
+        while (!target.classList.contains('drop-zone') && !target.classList.contains('draggable-items')) {
+            target = target.parentElement;
+            if(!target) return;
+        }
+
+        target.appendChild(draggedElement);
+        // Feedback resetten beim Bewegen
+        draggedElement.classList.remove('is-correct', 'is-incorrect', 'is-solution');
+    }
+
+    function checkDrag(id) {
+        const zones = document.querySelectorAll(`#${id} .drop-zone`);
+        
+        zones.forEach(zone => {
+            const items = zone.querySelectorAll('.draggable');
+            items.forEach(item => {
+                const correctTarget = item.getAttribute('data-target');
+                item.classList.remove('is-correct', 'is-incorrect', 'is-solution');
+                
+                if (zone.id === correctTarget) {
+                    item.classList.add('is-correct');
+                } else {
+                    item.classList.add('is-incorrect');
+                }
+            });
+        });
+    }
+
+    function resetDrag(id, sourceId) {
+        const source = document.getElementById(sourceId);
+        const draggables = document.querySelectorAll(`#${id} .draggable`);
+        
+        draggables.forEach(item => {
+            source.appendChild(item);
+            item.classList.remove('is-correct', 'is-incorrect', 'is-solution');
+        });
+    }
+
+    function solveDrag(id) {
+        const container = document.getElementById(id);
+        const draggables = container.querySelectorAll('.draggable');
+        
+        draggables.forEach(item => {
+            // Finde Zielzone
+            const targetId = item.getAttribute('data-target');
+            const targetZone = document.getElementById(targetId);
+            
+            // Verschiebe Element
+            targetZone.appendChild(item);
+            
+            // Markiere als Lösung
+            item.classList.remove('is-correct', 'is-incorrect');
+            item.classList.add('is-solution');
+        });
+    }
+
+</script>
+
+</body>
+</html>
