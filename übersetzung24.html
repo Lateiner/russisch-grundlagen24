@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Kontrastive Übersetzung</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --de-bg: #f8f9fa;      /* Hintergrund Deutsch */
+            --ru-bg: #e8f6f3;      /* Hintergrund Russisch */
+            --highlight: #e74c3c;  /* Hervorhebung "fragen" */
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #eceff1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- Übersetzungs-Karte --- */
+        .trans-card {
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden; /* Damit die Ecken sauber bleiben */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        /* Deutscher Teil */
+        .lang-section {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-de {
+            background-color: var(--de-bg);
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section-ru {
+            background-color: var(--ru-bg);
+        }
+
+        /* Flaggen / Labels */
+        .lang-label {
+            font-weight: 900;
+            color: #bdc3c7;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            min-width: 30px;
+        }
+
+        .sentence {
+            font-size: 1.1em;
+        }
+
+        /* Hervorhebung des Wortes "fragen" */
+        .highlight {
+            color: var(--highlight);
+            font-weight: bold;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        /* Dropdown im Satz */
+        select {
+            padding: 6px 10px;
+            font-size: 0.95em;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: #fff;
+            color: var(--primary-color);
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            margin: 0 5px;
+        }
+
+        select:focus {
+            border-color: #1abc9c;
+        }
+
+        /* --- Feedback & Erklärung --- */
+        .trans-card.is-correct {
+            border-color: var(--success-color);
+        }
+        .trans-card.is-correct .section-ru {
+            background-color: #eafaf1;
+        }
+        .trans-card.is-correct select {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .trans-card.is-wrong {
+            border-color: var(--error-color);
+        }
+        .trans-card.is-wrong .section-ru {
+            background-color: #fadbd8;
+        }
+        .trans-card.is-wrong select {
+            border-color: var(--error-color);
+        }
+
+        .trans-card.is-solution {
+            border-color: var(--solution-color);
+        }
+        .trans-card.is-solution .section-ru {
+            background-color: #fff3cd;
+        }
+
+        .explanation {
+            display: none;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            color: #555;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .explanation strong {
+            color: var(--primary-color);
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding-bottom: 40px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-solution { background-color: var(--solution-color); color: white; }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .lang-section {
+                flex-direction: column; /* Label über Text */
+                align-items: flex-start;
+                gap: 5px;
+            }
+            .section-de { padding-bottom: 10px; }
+            select { width: 100%; margin: 5px 0; }
+            .btn-group { flex-direction: column; }
+            button { width: 100%; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Achtung: "fragen" ist nicht gleich "fragen"!</h1>
+    <div class="instruction">
+        Im Deutschen benutzen wir oft "fragen" für Bitten. Im Russischen ist das falsch.<br>
+        Übersetze den Kontext korrekt.
+    </div>
+
+    <!-- Karte 1 -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Ich <span class="highlight">frage</span> dich, wie spät es ist.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Я 
+                <select data-answer="спрашиваю">
+                    <option value="">...</option>
+                    <option value="спрашиваю">спрашиваю</option>
+                    <option value="прошу">прошу</option>
+                </select>
+                тебя, который час.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Info:</strong> Hier willst du eine Information (Zeit). Russisch: <em>спрашивать</em>.
+        </div>
+    </div>
+
+    <!-- Karte 2 -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Ich <span class="highlight">frage</span> dich, mir kurz zu helfen.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Я 
+                <select data-answer="прошу">
+                    <option value="">...</option>
+                    <option value="спрашиваю">спрашиваю</option>
+                    <option value="прошу">прошу</option>
+                </select>
+                тебя помочь мне.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Aktion:</strong> Du willst eine Handlung (Hilfe). Das ist eine Bitte. Russisch: <em>просить</em>.
+        </div>
+    </div>
+
+    <!-- Karte 3 (Vergangenheit) -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Der Tourist <span class="highlight">fragte</span> nach dem Weg.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Турист 
+                <select data-answer="спросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                дорогу.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Info:</strong> Er wollte eine Information haben. Russisch: <em>спросил</em>.
+        </div>
+    </div>
+
+    <!-- Karte 4 (Vergangenheit) -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Er <span class="highlight">fragte</span> mich, ihm Geld zu leihen.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Он 
+                <select data-answer="попросил">
+                    <option value="">...</option>
+                    <option value="спросил">спросил</option>
+                    <option value="попросил">попросил</option>
+                </select>
+                меня дать ему деньги в долг.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Aktion:</strong> Er wollte eine Handlung/einen Gegenstand. Russisch: <em>попросил</em>.
+        </div>
+    </div>
+
+    <!-- Karte 5 -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Wir <span class="highlight">fragen</span> oft nach deiner Gesundheit.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Мы часто 
+                <select data-answer="спрашиваем">
+                    <option value="">...</option>
+                    <option value="спрашиваем">спрашиваем</option>
+                    <option value="просим">просим</option>
+                </select>
+                о твоём здоровье.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Info:</strong> Wir erkundigen uns (Thema: Gesundheit). Russisch: <em>спрашивать</em>.
+        </div>
+    </div>
+
+    <!-- Karte 6 -->
+    <div class="trans-card">
+        <div class="section-de lang-section">
+            <span class="lang-label">DE</span>
+            <span class="sentence">Sie <span class="highlight">fragt</span> die Kinder, nicht laut zu sein.</span>
+        </div>
+        <div class="section-ru lang-section">
+            <span class="lang-label">RU</span>
+            <span class="sentence">
+                Она 
+                <select data-answer="просит">
+                    <option value="">...</option>
+                    <option value="спрашивает">спрашивает</option>
+                    <option value="просит">просит</option>
+                </select>
+                детей не шуметь.
+            </span>
+        </div>
+        <div class="explanation">
+            <strong>Aktion:</strong> Sie möchte ein Verhalten (Ruhe) bewirken. Russisch: <em>просить</em>.
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const cards = document.querySelectorAll('.trans-card');
+        
+        cards.forEach(card => {
+            const select = card.querySelector('select');
+            const explanation = card.querySelector('.explanation');
+            const userAnswer = select.value;
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            // Reset styles
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            
+            if (userAnswer === "") return;
+
+            if (userAnswer === correctAnswer) {
+                card.classList.add('is-correct');
+            } else {
+                card.classList.add('is-wrong');
+            }
+            
+            // Erklärung immer anzeigen nach Check
+            explanation.style.display = 'block';
+        });
+    }
+
+    function resetGame() {
+        const cards = document.querySelectorAll('.trans-card');
+        
+        cards.forEach(card => {
+            const select = card.querySelector('select');
+            const explanation = card.querySelector('.explanation');
+            
+            select.value = "";
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            explanation.style.display = 'none';
+        });
+    }
+
+    function showSolution() {
+        const cards = document.querySelectorAll('.trans-card');
+        
+        cards.forEach(card => {
+            const select = card.querySelector('select');
+            const explanation = card.querySelector('.explanation');
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            select.value = correctAnswer;
+            
+            card.classList.remove('is-correct', 'is-wrong');
+            card.classList.add('is-solution');
+            explanation.style.display = 'block';
+        });
+    }
+</script>
+
+</body>
+</html>
