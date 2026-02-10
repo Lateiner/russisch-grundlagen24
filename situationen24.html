@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Situations-Reaktion</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .intro-box {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* --- Grid Layout für die Situationen --- */
+        .situation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        /* --- Situations-Karte --- */
+        .situation-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .situation-card h3 {
+            margin-top: 0;
+            font-size: 1.1em;
+            color: #2c3e50;
+            min-height: 3em;
+        }
+
+        .action-area {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .label-text {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #bdc3c7;
+            background-color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* --- Feedback Styles --- */
+        .situation-card.is-correct {
+            border-color: var(--success-color);
+            background-color: #f0fff4;
+        }
+        .situation-card.is-correct select {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .situation-card.is-wrong {
+            border-color: var(--error-color);
+            background-color: #fff5f5;
+        }
+        .situation-card.is-wrong select {
+            border-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .situation-card.is-solution {
+            border-color: var(--solution-color);
+            background-color: #fffaf0;
+        }
+        .situation-card.is-solution select {
+            border-color: var(--solution-color);
+            color: var(--solution-color);
+            background-color: #fef9e7;
+        }
+
+        .hint {
+            display: none;
+            font-size: 0.8em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            position: sticky;
+            bottom: 20px;
+            background-color: rgba(248, 249, 250, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-solution { background-color: var(--solution-color); color: white; }
+
+        /* --- Responsive --- */
+        @media (max-width: 600px) {
+            .situation-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; bottom: 0; border-radius: 0; }
+            button { max-width: none; width: 100%; }
+            .container { padding-bottom: 180px; } /* Platz für Sticky Buttons */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Was würdest du tun?</h1>
+    <div class="intro-box">
+        Analysiere die Situation: Suchst du eine <strong>Information</strong> (спрашивать) <br>oder willst du eine <strong>Handlung/Gegenstand</strong> (просить)?
+    </div>
+
+    <div class="situation-grid">
+        <!-- 1 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du willst wissen, wie spät es ist.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Info-Suche (Zeit)</div>
+            </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Du willst, dass dein Freund dir sein Auto leiht.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Wunsch nach einer Handlung</div>
+            </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du willst erfahren, warum dein Kollege heute traurig ist.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Suche nach dem Grund (Info)</div>
+            </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Du bittest die Lehrerin, den Satz noch einmal zu wiederholen.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Handlungsaufforderung</div>
+            </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du bist im Laden und willst wissen, wie viel das Brot kostet.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Info-Suche (Preis)</div>
+            </div>
+        </div>
+
+        <!-- 6 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Du brauchst Hilfe beim Tragen deiner schweren Koffer.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Bitte um Unterstützung</div>
+            </div>
+        </div>
+
+        <!-- 7 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Im Restaurant: Der Kellner soll dir die Rechnung bringen.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Aufforderung zur Aktion</div>
+            </div>
+        </div>
+
+        <!-- 8 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du hast dich verlaufen und suchst die Metro-Station.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Suche nach dem Weg (Info)</div>
+            </div>
+        </div>
+
+        <!-- 9 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Du möchtest nächste Woche einen Tag Urlaub nehmen.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Bitte um Erlaubnis/Aktion</div>
+            </div>
+        </div>
+
+        <!-- 10 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du willst wissen, ob dein Freund morgen Zeit für dich hat.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Info-Suche (Verfügbarkeit)</div>
+            </div>
+        </div>
+
+        <!-- 11 -->
+        <div class="situation-card" data-answer="req">
+            <h3>Es zieht im Zimmer. Jemand soll die Tür schließen.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Handlungswunsch</div>
+            </div>
+        </div>
+
+        <!-- 12 -->
+        <div class="situation-card" data-answer="ask">
+            <h3>Du fragst dich, wie das Wetter am Wochenende wird.</h3>
+            <div class="action-area">
+                <span class="label-text">Welches Verb nutzt du?</span>
+                <select>
+                    <option value="">---</option>
+                    <option value="ask">спрашивать (fragen)</option>
+                    <option value="req">просить (bitten)</option>
+                </select>
+                <div class="hint">Wissensdurst (Info)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkAll()">Überprüfen</button>
+        <button class="btn-reset" onclick="resetAll()">Zurücksetzen</button>
+        <button class="btn-solution" onclick="showAllSolutions()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAll() {
+        const cards = document.querySelectorAll('.situation-card');
+        cards.forEach(card => {
+            const select = card.querySelector('select');
+            const hint = card.querySelector('.hint');
+            const correctAnswer = card.dataset.answer;
+            const userAnswer = select.value;
+
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            hint.style.display = 'none';
+
+            if (userAnswer === "") return;
+
+            if (userAnswer === correctAnswer) {
+                card.classList.add('is-correct');
+            } else {
+                card.classList.add('is-wrong');
+            }
+        });
+    }
+
+    function resetAll() {
+        const cards = document.querySelectorAll('.situation-card');
+        cards.forEach(card => {
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            card.querySelector('select').value = "";
+            card.querySelector('.hint').style.display = 'none';
+        });
+    }
+
+    function showAllSolutions() {
+        const cards = document.querySelectorAll('.situation-card');
+        cards.forEach(card => {
+            const select = card.querySelector('select');
+            const hint = card.querySelector('.hint');
+            const correctAnswer = card.dataset.answer;
+
+            card.classList.remove('is-correct', 'is-wrong');
+            card.classList.add('is-solution');
+            select.value = correctAnswer;
+            hint.style.display = 'block';
+            hint.style.color = 'var(--solution-color)';
+        });
+    }
+</script>
+
+</body>
+</html>
