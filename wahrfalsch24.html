@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Wahr oder Falsch? (8 Beispiele)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --true-color: #27ae60;      /* Grün für Richtig */
+            --false-color: #c0392b;     /* Rot für Falsch */
+            --neutral-bg: #ecf0f1;
+            --card-bg: #ffffff;
+            --solution-color: #f39c12;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        /* --- Die Aufgaben-Karte --- */
+        .task-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 6px solid #bdc3c7; /* Standard Statusfarbe */
+            transition: all 0.3s ease;
+        }
+
+        .sentence {
+            font-size: 1.3em;
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .translation {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* --- Toggle Buttons (Wahr/Falsch) --- */
+        .toggle-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background-color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s;
+            color: #95a5a6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .choice-btn:hover {
+            background-color: #f9f9f9;
+            border-color: #bdc3c7;
+        }
+
+        /* Status: Ausgewählt (aber noch nicht geprüft) */
+        .choice-btn.selected {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* --- Feedback Styles (Nach Überprüfung) --- */
+        
+        /* Wenn User RICHTIG liegt */
+        .task-card.user-correct {
+            border-left-color: var(--true-color);
+            background-color: #eafaf1;
+        }
+        
+        /* Wenn User FALSCH liegt */
+        .task-card.user-wrong {
+            border-left-color: var(--false-color);
+            background-color: #fadbd8;
+        }
+
+        /* Button Farben nach Check */
+        .task-card.checked .choice-btn.btn-true.selected {
+             background-color: var(--primary-color); 
+        }
+
+        /* Erklärungstext */
+        .explanation {
+            display: none;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 0.95em;
+            color: #444;
+        }
+        
+        .explanation strong {
+            color: var(--primary-color);
+        }
+
+        /* Lösungshervorhebung */
+        .solution-border {
+            box-shadow: 0 0 0 3px var(--solution-color);
+        }
+
+        /* --- Steuerungs-Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-width: 150px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #34495e; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .choice-btn {
+                font-size: 1rem;
+            }
+            .task-card {
+                padding: 15px;
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Satz-Analyse: Richtig oder Falsch?</h1>
+    <p class="instruction">
+        Lies die Sätze genau. Wird das Verb (<span style="font-weight:bold">спрашивать</span> vs. <span style="font-weight:bold">просить</span>) im Kontext korrekt verwendet?
+    </p>
+
+    <!-- Satz 1 -->
+    <div class="task-card" data-correct-answer="false">
+        <div class="sentence">1. Я просил его, где он живет.</div>
+        <span class="translation">"Ich bat ihn, wo er wohnt."</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>falsch</strong>. <br>
+            Der Nebensatz "wo er wohnt" ist eine <em>Information</em>. Deshalb muss man <strong>спросил</strong> verwenden.
+        </div>
+    </div>
+
+    <!-- Satz 2 -->
+    <div class="task-card" data-correct-answer="true">
+        <div class="sentence">2. Турист спросил, как пройти в музей.</div>
+        <span class="translation">"Der Tourist fragte, wie man zum Museum kommt."</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>richtig</strong>. <br>
+            "Wie man zum Museum kommt" ist eine Informationsfrage. <strong>Спросил</strong> ist hier korrekt.
+        </div>
+    </div>
+
+    <!-- Satz 3 -->
+    <div class="task-card" data-correct-answer="false">
+        <div class="sentence">3. Он спросил меня помочь ему.</div>
+        <span class="translation">"Er fragte mich, ihm zu helfen." (wörtlich)</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>falsch</strong>. <br>
+            "Helfen" (помочь) ist eine Handlung. Man verwendet den Infinitiv mit <strong>попросил</strong> (bitten).
+        </div>
+    </div>
+
+    <!-- Satz 4 -->
+    <div class="task-card" data-correct-answer="true">
+        <div class="sentence">4. Мама попросила сына купить хлеб.</div>
+        <span class="translation">"Mama bat den Sohn, Brot zu kaufen."</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>richtig</strong>. <br>
+            Es geht um eine Handlung (Brot kaufen). <strong>Попросила</strong> ist korrekt.
+        </div>
+    </div>
+
+    <!-- Satz 5 -->
+    <div class="task-card" data-correct-answer="false">
+        <div class="sentence">5. Мы просили о погоде.</div>
+        <span class="translation">"Wir baten über das Wetter." (wörtlich)</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>falsch</strong>. <br>
+            Die Präposition <strong>о</strong> (über) signalisiert ein Gesprächsthema (Info). Man muss <strong>спросили</strong> verwenden.
+        </div>
+    </div>
+
+    <!-- Satz 6 (Neu) -->
+    <div class="task-card" data-correct-answer="false">
+        <div class="sentence">6. Она попросила, когда начинается концерт.</div>
+        <span class="translation">"Sie bat, wann das Konzert beginnt." (wörtlich)</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>falsch</strong>. <br>
+            Das Fragewort "wann" (когда) leitet eine Informationsfrage ein. Hier muss <strong>спросила</strong> stehen.
+        </div>
+    </div>
+
+    <!-- Satz 7 (Neu) -->
+    <div class="task-card" data-correct-answer="true">
+        <div class="sentence">7. Отец попросил детей не шуметь.</div>
+        <span class="translation">"Der Vater bat die Kinder, nicht laut zu sein."</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>richtig</strong>. <br>
+            Auch bei Verneinungen ("nicht lärmen") geht es um eine Handlung. Der Infinitiv verlangt <strong>попросил</strong>.
+        </div>
+    </div>
+
+    <!-- Satz 8 (Neu) -->
+    <div class="task-card" data-correct-answer="false">
+        <div class="sentence">8. Я хочу спросить тебя дать мне ручку.</div>
+        <span class="translation">"Ich will dich fragen, mir den Stift zu geben." (wörtlich)</span>
+        
+        <div class="toggle-container">
+            <div class="choice-btn btn-true" onclick="selectOption(this, 'true')">Richtig</div>
+            <div class="choice-btn btn-false" onclick="selectOption(this, 'false')">Falsch</div>
+        </div>
+
+        <div class="explanation">
+            <strong>Analyse:</strong> Das ist <strong>falsch</strong>. <br>
+            Das ist ein typischer Fehler. Da "geben" (дать) eine Aktion ist, muss es heißen: "Я хочу <strong>попросить</strong> тебя..."
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="ctrl-btn btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="ctrl-btn btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function selectOption(btn, choice) {
+        // Finde die zugehörige Karte
+        const card = btn.closest('.task-card');
+        
+        // Entferne 'selected' von allen Buttons in dieser Karte
+        const buttons = card.querySelectorAll('.choice-btn');
+        buttons.forEach(b => b.classList.remove('selected'));
+        
+        // Markiere den geklickten Button
+        btn.classList.add('selected');
+        
+        // Speichere die Wahl im Dataset der Karte
+        card.dataset.userChoice = choice;
+
+        // Reset Feedback styles wenn der User seine Meinung ändert
+        card.classList.remove('user-correct', 'user-wrong', 'checked');
+        const expl = card.querySelector('.explanation');
+        if(expl) expl.style.display = 'none';
+    }
+
+    function checkAnswers() {
+        const cards = document.querySelectorAll('.task-card');
+
+        cards.forEach(card => {
+            const correctAnswer = card.dataset.correctAnswer; // 'true' oder 'false'
+            const userChoice = card.dataset.userChoice;       // 'true' oder 'false' oder undefined
+
+            // Wenn der User nichts gewählt hat, überspringen
+            if (!userChoice) return;
+
+            card.classList.add('checked');
+
+            if (userChoice === correctAnswer) {
+                card.classList.add('user-correct');
+                card.classList.remove('user-wrong');
+            } else {
+                card.classList.add('user-wrong');
+                card.classList.remove('user-correct');
+            }
+
+            // Erklärung anzeigen
+            const expl = card.querySelector('.explanation');
+            if (expl) expl.style.display = 'block';
+        });
+    }
+
+    function resetGame() {
+        const cards = document.querySelectorAll('.task-card');
+        
+        cards.forEach(card => {
+            // Attribute und Klassen zurücksetzen
+            delete card.dataset.userChoice;
+            card.classList.remove('user-correct', 'user-wrong', 'checked');
+            
+            // Buttons zurücksetzen
+            const buttons = card.querySelectorAll('.choice-btn');
+            buttons.forEach(b => {
+                b.classList.remove('selected', 'solution-border');
+            });
+
+            // Erklärung ausblenden
+            const expl = card.querySelector('.explanation');
+            if (expl) expl.style.display = 'none';
+        });
+    }
+
+    function showSolution() {
+        // Erst resetten
+        resetGame();
+
+        const cards = document.querySelectorAll('.task-card');
+        
+        cards.forEach(card => {
+            const correctAnswer = card.dataset.correctAnswer;
+            
+            // Den richtigen Button finden und hervorheben
+            const correctBtn = card.querySelector(`.btn-${correctAnswer}`);
+            if (correctBtn) {
+                correctBtn.classList.add('selected');
+                correctBtn.classList.add('solution-border');
+            }
+
+            // Erklärung anzeigen
+            const expl = card.querySelector('.explanation');
+            if (expl) expl.style.display = 'block';
+        });
+    }
+</script>
+
+</body>
+</html>
