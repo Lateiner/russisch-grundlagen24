@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Lückentext (Auswahl)</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --input-border: #bdc3c7;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* --- Satz-Container --- */
+        .sentence-item {
+            background-color: var(--card-bg);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid transparent; /* Platz für Statusfarbe */
+            transition: border-color 0.3s;
+        }
+
+        .sentence-content {
+            font-size: 1.15em;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .translation {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.9em;
+            color: #95a5a6;
+            font-style: italic;
+            width: 100%;
+        }
+
+        /* --- Dropdown Styling --- */
+        select {
+            padding: 8px 12px;
+            font-size: 1em;
+            border: 2px solid var(--input-border);
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: bold;
+            outline: none;
+            min-width: 140px;
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        /* --- Feedback Styles --- */
+        .sentence-item.is-correct {
+            border-left-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+        .sentence-item.is-correct select {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .sentence-item.is-wrong {
+            border-left-color: var(--error-color);
+            background-color: #fadbd8;
+        }
+        .sentence-item.is-wrong select {
+            border-color: var(--error-color);
+        }
+
+        .sentence-item.is-solution {
+            border-left-color: var(--solution-color);
+        }
+        .sentence-item.is-solution select {
+            border-color: var(--solution-color);
+            background-color: #fef9e7;
+        }
+
+        /* Erklärungstext (erscheint bei Lösung/Check) */
+        .grammar-hint {
+            display: none;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: var(--primary-color);
+            padding-top: 8px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-width: 150px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #34495e; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .sentence-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            select {
+                width: 100%; /* Volle Breite auf Handy */
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lückentext: fragen oder bitten?</h1>
+    <p class="instruction">
+        Wähle das passende Verb aus. Achte auf den Kontext:<br>
+        Geht es um eine <strong>Information</strong> (wo, wann...) oder eine <strong>Handlung</strong> (Infinitiv)?
+    </p>
+
+    <!-- Satz 1 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>1. Турист</span>
+            <select data-answer="спросил">
+                <option value="">---</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            <span>меня, где находится музей.</span>
+        </div>
+        <span class="translation">Der Tourist fragte mich, wo das Museum ist.</span>
+        <div class="grammar-hint">Grund: Nebensatz mit "где" (Information).</div>
+    </div>
+
+    <!-- Satz 2 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>2. Мама</span>
+            <select data-answer="попросила">
+                <option value="">---</option>
+                <option value="спросила">спросила</option>
+                <option value="попросила">попросила</option>
+            </select>
+            <span>сына купить хлеб.</span>
+        </div>
+        <span class="translation">Mama bat den Sohn, Brot zu kaufen.</span>
+        <div class="grammar-hint">Grund: Infinitiv "купить" (Handlung).</div>
+    </div>
+
+    <!-- Satz 3 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>3. Студент</span>
+            <select data-answer="попросил">
+                <option value="">---</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            <span>повторить вопрос.</span>
+        </div>
+        <span class="translation">Der Student bat darum, die Frage zu wiederholen.</span>
+        <div class="grammar-hint">Grund: Infinitiv "повторить" (Handlung).</div>
+    </div>
+
+    <!-- Satz 4 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>4. Я</span>
+            <select data-answer="спросил">
+                <option value="">---</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            <span>его, почему он не пришел.</span>
+        </div>
+        <span class="translation">Ich fragte ihn, warum er nicht gekommen ist.</span>
+        <div class="grammar-hint">Grund: Nebensatz mit "почему" (Information).</div>
+    </div>
+
+    <!-- Satz 5 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>5. Учитель</span>
+            <select data-answer="спросил">
+                <option value="">---</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            <span>ученика о домашнем задании.</span>
+        </div>
+        <span class="translation">Der Lehrer fragte den Schüler nach der Hausaufgabe.</span>
+        <div class="grammar-hint">Grund: Präposition "о" (nach etwas/worüber = Information).</div>
+    </div>
+
+    <!-- Satz 6 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>6. Она</span>
+            <select data-answer="попросила">
+                <option value="">---</option>
+                <option value="спросила">спросила</option>
+                <option value="попросила">попросила</option>
+            </select>
+            <span>меня помочь ей.</span>
+        </div>
+        <span class="translation">Sie bat mich, ihr zu helfen.</span>
+        <div class="grammar-hint">Grund: Infinitiv "помочь" (Handlung).</div>
+    </div>
+
+    <!-- Satz 7 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>7. Мы</span>
+            <select data-answer="спросили">
+                <option value="">---</option>
+                <option value="спросили">спросили</option>
+                <option value="попросили">попросили</option>
+            </select>
+            <span>, сколько стоит билет.</span>
+        </div>
+        <span class="translation">Wir fragten, wie viel das Ticket kostet.</span>
+        <div class="grammar-hint">Grund: Nebensatz mit "сколько" (Information).</div>
+    </div>
+
+    <!-- Satz 8 -->
+    <div class="sentence-item">
+        <div class="sentence-content">
+            <span>8. Друг</span>
+            <select data-answer="попросил">
+                <option value="">---</option>
+                <option value="спросил">спросил</option>
+                <option value="попросил">попросил</option>
+            </select>
+            <span>дать ему книгу.</span>
+        </div>
+        <span class="translation">Der Freund bat (mich), ihm das Buch zu geben.</span>
+        <div class="grammar-hint">Grund: Infinitiv "дать" (Handlung).</div>
+    </div>
+
+    <div class="btn-group">
+        <button class="ctrl-btn btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="ctrl-btn btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        const sentences = document.querySelectorAll('.sentence-item');
+        
+        sentences.forEach(item => {
+            const select = item.querySelector('select');
+            const userAnswer = select.value;
+            const correctAnswer = select.getAttribute('data-answer');
+            const hint = item.querySelector('.grammar-hint');
+
+            // Klassen zurücksetzen
+            item.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            
+            if (userAnswer === "") {
+                // Nichts ausgewählt - als neutral oder falsch behandeln (hier neutral/ignorieren)
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                item.classList.add('is-correct');
+            } else {
+                item.classList.add('is-wrong');
+            }
+            
+            // Hinweis anzeigen
+            if(hint) hint.style.display = 'block';
+        });
+    }
+
+    function resetGame() {
+        const sentences = document.querySelectorAll('.sentence-item');
+        
+        sentences.forEach(item => {
+            const select = item.querySelector('select');
+            const hint = item.querySelector('.grammar-hint');
+            
+            // Zurücksetzen
+            select.value = "";
+            item.classList.remove('is-correct', 'is-wrong', 'is-solution');
+            if(hint) hint.style.display = 'none';
+        });
+    }
+
+    function showSolution() {
+        const sentences = document.querySelectorAll('.sentence-item');
+        
+        sentences.forEach(item => {
+            const select = item.querySelector('select');
+            const hint = item.querySelector('.grammar-hint');
+            const correctAnswer = select.getAttribute('data-answer');
+            
+            // Lösung setzen
+            select.value = correctAnswer;
+            
+            // Styling für Lösung
+            item.classList.remove('is-correct', 'is-wrong');
+            item.classList.add('is-solution');
+            
+            // Hinweis anzeigen
+            if(hint) hint.style.display = 'block';
+        });
+    }
+</script>
+
+</body>
+</html>
