@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch: Bildbeschreibung (5 Beispiele)</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .instruction {
+            text-align: center;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        /* --- Layout für die Szenen --- */
+        .scenes-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .scene-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            flex-direction: row; /* Desktop: Bild links, Text rechts */
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        /* --- Die "Bilder" (CSS Art / Visuals) --- */
+        .visual-stage {
+            width: 180px;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* Hintergrundfarben für Abwechslung */
+        .bg-1 { background-color: #e3f2fd; } /* Blau */
+        .bg-2 { background-color: #f3e5f5; } /* Violett */
+        .bg-3 { background-color: #e8f5e9; } /* Grün */
+        .bg-4 { background-color: #fff3e0; } /* Orange */
+        .bg-5 { background-color: #ffebee; } /* Rot */
+
+        /* Emojis groß */
+        .avatar {
+            font-size: 70px;
+            position: relative;
+            line-height: 1;
+            z-index: 1;
+        }
+
+        /* Denkblase für Frage */
+        .bubble-question {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: var(--accent-color);
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+            animation: float 3s ease-in-out infinite;
+            z-index: 2;
+        }
+        
+        /* Hand für Bitte */
+        .icon-action {
+            position: absolute;
+            top: 25px;
+            right: 10px;
+            font-size: 35px;
+            animation: shake 2.5s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes shake { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+
+        /* --- Der Baukasten-Bereich --- */
+        .builder-area {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .builder-area h3 {
+            margin-top: 0;
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .sentence-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            font-size: 1.1em;
+        }
+
+        /* Dropdowns */
+        select.build-select {
+            padding: 8px 12px;
+            font-size: 0.95em;
+            border: 2px solid #bdc3c7;
+            border-radius: 6px;
+            background-color: white;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--primary-color);
+            transition: all 0.2s;
+            max-width: 100%;
+        }
+
+        select.build-select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        /* --- Feedback Styles --- */
+        .scene-card.is-correct {
+            border-color: var(--success-color);
+            background-color: #f0fdf4;
+        }
+        .scene-card.is-correct select {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .scene-card.is-wrong {
+            border-color: var(--error-color);
+            background-color: #fef2f2;
+        }
+        .scene-card.is-wrong select {
+            border-color: var(--error-color);
+        }
+
+        .scene-card.is-solution {
+            border-color: var(--solution-color);
+        }
+        .scene-card.is-solution select {
+            border-color: var(--solution-color);
+            background-color: #fffbeb;
+            color: #d35400;
+        }
+
+        /* --- Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            padding-bottom: 40px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #34495e; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 700px) {
+            .scene-card {
+                flex-direction: column; /* Bild oben, Text unten */
+            }
+            .visual-stage {
+                width: 100%;
+                height: 140px;
+                padding: 10px;
+            }
+            .sentence-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            select.build-select {
+                width: 100%;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Bildbeschreibung: Satz-Baukasten</h1>
+    <div class="instruction">
+        Schau dir die Bilder an. Bilde passende Sätze.<br>
+        <small>Symbol ❓ = Information (Frage) | Symbol 🫴 = Handlung (Bitte)</small>
+    </div>
+
+    <div class="scenes-wrapper">
+
+        <!-- Szene 1: Tourist / Metro (Info) -->
+        <div class="scene-card" id="scene1">
+            <div class="visual-stage bg-1">
+                <div class="avatar">👨‍🦰</div>
+                <div class="bubble-question">?</div>
+            </div>
+            <div class="builder-area">
+                <h3>Bild 1: Er sucht die Metro (Info)</h3>
+                <div class="sentence-row">
+                    <!-- Subjekt -->
+                    <select class="build-select" id="s1-part1" data-answer="Турист">
+                        <option value="">(Wer?)</option>
+                        <option value="Турист">Турист (Tourist)</option>
+                        <option value="Она">Она (Sie)</option>
+                    </select>
+
+                    <!-- Verb -->
+                    <select class="build-select" id="s1-part2" data-answer="спросил">
+                        <option value="">(Tat was?)</option>
+                        <option value="спросил">спросил</option>
+                        <option value="попросил">попросил</option>
+                    </select>
+
+                    <!-- Ergänzung -->
+                    <select class="build-select" id="s1-part3" data-answer="где метро">
+                        <option value="">(Was?)</option>
+                        <option value="где метро">где метро (wo die Metro ist)</option>
+                        <option value="помочь ему">помочь ему (ihm zu helfen)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Szene 2: Anna / Stift (Bitte) -->
+        <div class="scene-card" id="scene2">
+            <div class="visual-stage bg-2">
+                <div class="avatar">👩</div>
+                <div class="icon-action">🫴</div>
+            </div>
+            <div class="builder-area">
+                <h3>Bild 2: Sie braucht einen Stift (Aktion)</h3>
+                <div class="sentence-row">
+                    <select class="build-select" id="s2-part1" data-answer="Анна">
+                        <option value="">(Wer?)</option>
+                        <option value="Анна">Анна (Anna)</option>
+                        <option value="Брат">Брат (Bruder)</option>
+                    </select>
+
+                    <select class="build-select" id="s2-part2" data-answer="попросила">
+                        <option value="">(Tat was?)</option>
+                        <option value="спросила">спросила</option>
+                        <option value="попросила">попросила</option>
+                    </select>
+
+                    <select class="build-select" id="s2-part3" data-answer="дать ручку">
+                        <option value="">(Was?)</option>
+                        <option value="который час">который час (wie spät es ist)</option>
+                        <option value="дать ручку">дать ручку (einen Stift zu geben)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Szene 3: Student / Uhrzeit (Info) -->
+        <div class="scene-card" id="scene3">
+            <div class="visual-stage bg-3">
+                <div class="avatar">🧑‍🎓</div> <!-- Student -->
+                <div class="bubble-question">🕒</div> <!-- Uhr -->
+            </div>
+            <div class="builder-area">
+                <h3>Bild 3: Er will die Uhrzeit wissen (Info)</h3>
+                <div class="sentence-row">
+                    <select class="build-select" id="s3-part1" data-answer="Студент">
+                        <option value="">(Wer?)</option>
+                        <option value="Студент">Студент (Student)</option>
+                        <option value="Мама">Мама (Mama)</option>
+                    </select>
+
+                    <select class="build-select" id="s3-part2" data-answer="спросил">
+                        <option value="">(Tat was?)</option>
+                        <option value="спросил">спросил</option>
+                        <option value="попросил">попросил</option>
+                    </select>
+
+                    <select class="build-select" id="s3-part3" data-answer="который час">
+                        <option value="">(Was?)</option>
+                        <option value="открыть окно">открыть окно (Fenster zu öffnen)</option>
+                        <option value="который час">который час (wie spät es ist)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Szene 4: Lehrer / Lesen (Bitte/Aktion) -->
+        <div class="scene-card" id="scene4">
+            <div class="visual-stage bg-4">
+                <div class="avatar">👨‍🏫</div> <!-- Lehrer -->
+                <div class="icon-action">📖</div> <!-- Buch -->
+            </div>
+            <div class="builder-area">
+                <h3>Bild 4: Er fordert zum Lesen auf (Aktion)</h3>
+                <div class="sentence-row">
+                    <select class="build-select" id="s4-part1" data-answer="Учитель">
+                        <option value="">(Wer?)</option>
+                        <option value="Учитель">Учитель (Lehrer)</option>
+                        <option value="Друг">Друг (Freund)</option>
+                    </select>
+
+                    <select class="build-select" id="s4-part2" data-answer="попросил">
+                        <option value="">(Tat was?)</option>
+                        <option value="спросил">спросил</option>
+                        <option value="попросил">попросил</option>
+                    </select>
+
+                    <select class="build-select" id="s4-part3" data-answer="читать текст">
+                        <option value="">(Was?)</option>
+                        <option value="читать текст">читать текст (Text zu lesen)</option>
+                        <option value="где книга">где книга (wo das Buch ist)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Szene 5: Mama / Brot (Bitte/Aktion) -->
+        <div class="scene-card" id="scene5">
+            <div class="visual-stage bg-5">
+                <div class="avatar">🤰</div> <!-- Mama -->
+                <div class="icon-action">🍞</div> <!-- Brot -->
+            </div>
+            <div class="builder-area">
+                <h3>Bild 5: Sie möchte Brot haben (Aktion)</h3>
+                <div class="sentence-row">
+                    <select class="build-select" id="s5-part1" data-answer="Мама">
+                        <option value="">(Wer?)</option>
+                        <option value="Мама">Мама (Mama)</option>
+                        <option value="Сосед">Сосед (Nachbar)</option>
+                    </select>
+
+                    <select class="build-select" id="s5-part2" data-answer="попросила">
+                        <option value="">(Tat was?)</option>
+                        <option value="спросила">спросила</option>
+                        <option value="попросила">попросила</option>
+                    </select>
+
+                    <select class="build-select" id="s5-part3" data-answer="купить хлеб">
+                        <option value="">(Was?)</option>
+                        <option value="о погоде">о погоде (nach dem Wetter)</option>
+                        <option value="купить хлеб">купить хлеб (Brot zu kaufen)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-check" onclick="checkAnswers()">Sätze überprüfen</button>
+        <button class="btn-reset" onclick="resetGame()">Neu bauen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    function checkAnswers() {
+        // Liste aller Szenen-IDs
+        const scenes = ['scene1', 'scene2', 'scene3', 'scene4', 'scene5'];
+        
+        scenes.forEach(sceneId => {
+            const card = document.getElementById(sceneId);
+            const selects = card.querySelectorAll('select');
+            let isSceneCorrect = true;
+            let allFilled = true;
+
+            // Prüfe jedes Dropdown in der Szene
+            selects.forEach(select => {
+                const userAnswer = select.value;
+                const correctAnswer = select.getAttribute('data-answer');
+                
+                if (userAnswer === "") {
+                    allFilled = false;
+                }
+                
+                if (userAnswer !== correctAnswer) {
+                    isSceneCorrect = false;
+                }
+            });
+
+            // Styling zurücksetzen
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+
+            if (!allFilled) {
+                // Wenn unvollständig -> als falsch markieren bei Klick auf "Prüfen"
+                card.classList.add('is-wrong');
+            } else if (isSceneCorrect) {
+                card.classList.add('is-correct');
+            } else {
+                card.classList.add('is-wrong');
+            }
+        });
+    }
+
+    function resetGame() {
+        const selects = document.querySelectorAll('select');
+        const cards = document.querySelectorAll('.scene-card');
+
+        selects.forEach(select => {
+            select.value = "";
+        });
+
+        cards.forEach(card => {
+            card.classList.remove('is-correct', 'is-wrong', 'is-solution');
+        });
+    }
+
+    function showSolution() {
+        const scenes = ['scene1', 'scene2', 'scene3', 'scene4', 'scene5'];
+        
+        scenes.forEach(sceneId => {
+            const card = document.getElementById(sceneId);
+            const selects = card.querySelectorAll('select');
+
+            selects.forEach(select => {
+                const correctAnswer = select.getAttribute('data-answer');
+                select.value = correctAnswer;
+            });
+
+            card.classList.remove('is-correct', 'is-wrong');
+            card.classList.add('is-solution');
+        });
+    }
+</script>
+
+</body>
+</html>
