@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russisch Rapid Fire: Info oder Aktion?</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --info-color: #3498db;     /* Blau für Fragen/Info */
+            --action-color: #9b59b6;   /* Violett für Bitten/Aktion */
+            --success-color: #27ae60;
+            --error-color: #c0392b;
+            --solution-color: #f39c12;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .instruction {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #636e72;
+            font-size: 1.1em;
+        }
+
+        .key-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        /* --- Grid Layout --- */
+        .rapid-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Die einzelne Karte --- */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .phrase-ru {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .phrase-de {
+            color: #7f8c8d;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* --- Die Auswahl-Buttons (Toggle) --- */
+        .choice-container {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            padding: 12px 5px;
+            border: 2px solid #dfe6e9;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #95a5a6;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .choice-btn span.verb {
+            font-size: 0.8em;
+            font-weight: normal;
+            opacity: 0.7;
+        }
+
+        /* Hover Effekte */
+        .choice-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #b2bec3;
+        }
+
+        /* Selected State: Info/Frage */
+        .choice-btn.type-info.selected {
+            background-color: var(--info-color);
+            color: white;
+            border-color: var(--info-color);
+        }
+
+        /* Selected State: Action/Bitte */
+        .choice-btn.type-action.selected {
+            background-color: var(--action-color);
+            color: white;
+            border-color: var(--action-color);
+        }
+
+        /* --- Feedback Styles --- */
+        
+        /* Richtig */
+        .card.is-correct {
+            border-color: var(--success-color);
+            background-color: #eafaf1;
+        }
+        .card.is-correct .choice-btn.selected {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+        }
+        .card.is-correct::after {
+            content: "✔ Richtig";
+            color: var(--success-color);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Falsch */
+        .card.is-wrong {
+            border-color: var(--error-color);
+            background-color: #fadbd8;
+        }
+        .card.is-wrong .choice-btn.selected {
+            background-color: var(--error-color);
+            border-color: var(--error-color);
+        }
+        .card.is-wrong::after {
+            content: "✘ Falsch";
+            color: var(--error-color);
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Lösung anzeigen */
+        .choice-btn.show-solution {
+            box-shadow: 0 0 0 4px var(--solution-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Steuerungs-Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dfe6e9;
+        }
+
+        button.ctrl-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            min-width: 160px;
+        }
+
+        .btn-check { background-color: var(--primary-color); color: white; }
+        .btn-check:hover { background-color: #34495e; }
+
+        .btn-reset { background-color: #95a5a6; color: white; }
+        .btn-reset:hover { background-color: #7f8c8d; }
+
+        .btn-solution { background-color: var(--solution-color); color: white; }
+        .btn-solution:hover { background-color: #d35400; }
+
+        /* Mobile Optimierung */
+        @media (max-width: 600px) {
+            .rapid-grid {
+                grid-template-columns: 1fr; /* Eine Spalte auf Mobile */
+            }
+            .choice-btn {
+                padding: 15px 5px; /* Größere Touch-Fläche */
+            }
+            button.ctrl-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Rapid Fire: Info oder Aktion?</h1>
+    <p class="instruction">
+        Entscheide blitzschnell: Sucht die Person eine Information (Frage) oder will sie eine Handlung (Bitte)?
+    </p>
+
+    <div class="key-legend">
+        <div class="legend-item"><div class="dot" style="background: var(--info-color)"></div> Info (спрашивать)</div>
+        <div class="legend-item"><div class="dot" style="background: var(--action-color)"></div> Aktion (просить)</div>
+    </div>
+
+    <div class="rapid-grid">
+        
+        <!-- Karte 1 -->
+        <div class="card" data-correct="info">
+            <div class="phrase-ru">... где вокзал?</div>
+            <div class="phrase-de">... wo der Bahnhof ist?</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 2 -->
+        <div class="card" data-correct="action">
+            <div class="phrase-ru">... помочь мне</div>
+            <div class="phrase-de">... mir zu helfen</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 3 -->
+        <div class="card" data-correct="action">
+            <div class="phrase-ru">... открыть окно</div>
+            <div class="phrase-de">... das Fenster zu öffnen</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 4 -->
+        <div class="card" data-correct="info">
+            <div class="phrase-ru">... почему он здесь</div>
+            <div class="phrase-de">... warum er hier ist</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 5 -->
+        <div class="card" data-correct="info">
+            <div class="phrase-ru">... о погоде</div>
+            <div class="phrase-de">... nach dem Wetter</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 6 -->
+        <div class="card" data-correct="action">
+            <div class="phrase-ru">... дать ручку</div>
+            <div class="phrase-de">... den Stift zu geben</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 7 -->
+        <div class="card" data-correct="info">
+            <div class="phrase-ru">... сколько стоит</div>
+            <div class="phrase-de">... wie viel es kostet</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Karte 8 -->
+        <div class="card" data-correct="action">
+            <div class="phrase-ru">... не шуметь</div>
+            <div class="phrase-de">... nicht laut zu sein</div>
+            <div class="choice-container">
+                <div class="choice-btn type-info" onclick="selectOption(this, 'info')">
+                    INFO<br><span class="verb">спрашивать</span>
+                </div>
+                <div class="choice-btn type-action" onclick="selectOption(this, 'action')">
+                    AKTION<br><span class="verb">просить</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="btn-group">
+        <button class="ctrl-btn btn-check" onclick="checkAnswers()">Überprüfen</button>
+        <button class="ctrl-btn btn-reset" onclick="resetGame()">Zurücksetzen</button>
+        <button class="ctrl-btn btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    // Funktion zum Auswählen einer Option
+    function selectOption(btn, type) {
+        // Find the parent card
+        const card = btn.closest('.card');
+        
+        // Remove 'selected' from all buttons in this card
+        const buttons = card.querySelectorAll('.choice-btn');
+        buttons.forEach(b => b.classList.remove('selected'));
+        
+        // Add 'selected' to clicked button
+        btn.classList.add('selected');
+
+        // Optional: Remove feedback immediately if user changes mind
+        card.classList.remove('is-correct', 'is-wrong');
+    }
+
+    // Antworten überprüfen
+    function checkAnswers() {
+        const cards = document.querySelectorAll('.card');
+        
+        cards.forEach(card => {
+            const correctAnswer = card.getAttribute('data-correct');
+            const selectedBtn = card.querySelector('.choice-btn.selected');
+            
+            // Reset styles first
+            card.classList.remove('is-correct', 'is-wrong');
+
+            if (selectedBtn) {
+                // Determine user's choice based on class
+                let userChoice = selectedBtn.classList.contains('type-info') ? 'info' : 'action';
+
+                if (userChoice === correctAnswer) {
+                    card.classList.add('is-correct');
+                } else {
+                    card.classList.add('is-wrong');
+                }
+            }
+        });
+    }
+
+    // Zurücksetzen
+    function resetGame() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.classList.remove('is-correct', 'is-wrong');
+            const buttons = card.querySelectorAll('.choice-btn');
+            buttons.forEach(b => {
+                b.classList.remove('selected', 'show-solution');
+            });
+        });
+    }
+
+    // Lösung anzeigen
+    function showSolution() {
+        // Erst resetten
+        resetGame();
+
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            const correctAnswer = card.getAttribute('data-correct');
+            // Finde den Button, der der Lösung entspricht
+            const correctBtn = card.querySelector(`.choice-btn.type-${correctAnswer}`);
+            
+            if (correctBtn) {
+                correctBtn.classList.add('selected'); // Markiere ihn als "gewählt"
+                correctBtn.classList.add('show-solution'); // Füge Lösungs-Glow hinzu
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
